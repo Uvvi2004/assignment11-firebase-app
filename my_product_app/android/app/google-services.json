@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "714498469888",
+    "project_id": "my-product-app-uddhav-42dac",
+    "storage_bucket": "my-product-app-uddhav-42dac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:714498469888:android:a0c353e977cfa2943e28e5",
+        "android_client_info": {
+          "package_name": "com.example.my_product_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqILE2Fz85slVhrfzF70oIwhf1P3msXFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
