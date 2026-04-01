@@ -33,6 +33,9 @@ class _ProductPageState extends State<ProductPage> {
   double? minPrice;
   double? maxPrice;
 
+  TextEditingController minController = TextEditingController();
+  TextEditingController maxController = TextEditingController();
+
   // ADD
   Future<void> _addProduct(BuildContext context) async {
     TextEditingController nameController = TextEditingController();
@@ -154,7 +157,7 @@ class _ProductPageState extends State<ProductPage> {
 
       body: Column(
         children: [
-          // 🔍 SEARCH BAR
+          // SEARCH
           Padding(
             padding: const EdgeInsets.all(8),
             child: TextField(
@@ -170,29 +173,35 @@ class _ProductPageState extends State<ProductPage> {
             ),
           ),
 
-          // 💰 PRICE FILTER
+          // FILTER
           Padding(
             padding: const EdgeInsets.all(8),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
+                    controller: minController,
                     decoration:
                         const InputDecoration(labelText: 'Min Price'),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
-                      minPrice = double.tryParse(value);
+                      setState(() {
+                        minPrice = double.tryParse(value);
+                      });
                     },
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
+                    controller: maxController,
                     decoration:
                         const InputDecoration(labelText: 'Max Price'),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
-                      maxPrice = double.tryParse(value);
+                      setState(() {
+                        maxPrice = double.tryParse(value);
+                      });
                     },
                   ),
                 ),
@@ -203,6 +212,8 @@ class _ProductPageState extends State<ProductPage> {
                       searchQuery = '';
                       minPrice = null;
                       maxPrice = null;
+                      minController.clear();
+                      maxController.clear();
                     });
                   },
                 )
