@@ -8,22 +8,20 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: ProductPage(),
     );
   }
 }
 
 class ProductPage extends StatelessWidget {
-  const ProductPage({super.key});
+  ProductPage({super.key});
 
   final CollectionReference products =
       FirebaseFirestore.instance.collection('products');
@@ -73,54 +71,6 @@ class ProductPage extends StatelessWidget {
     );
   }
 
-  // UPDATE
-  Future<void> _updateProduct(
-      BuildContext context, String id, String currentName, double currentPrice) async {
-    TextEditingController nameController =
-        TextEditingController(text: currentName);
-    TextEditingController priceController =
-        TextEditingController(text: currentPrice.toString());
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Update Product'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-              ),
-              TextField(
-                controller: priceController,
-                decoration: const InputDecoration(labelText: 'Price'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                double price =
-                    double.tryParse(priceController.text) ?? 0.0;
-
-                await products.doc(id).update({
-                  'name': nameController.text,
-                  'price': price,
-                });
-
-                Navigator.pop(context);
-              },
-              child: const Text('Update'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   // DELETE
   Future<void> _deleteProduct(String id, BuildContext context) async {
     await products.doc(id).delete();
@@ -134,7 +84,6 @@ class ProductPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Products')),
-
       body: StreamBuilder(
         stream: products.snapshots(),
         builder: (context, AsyncSnapshot snapshot) {
@@ -151,16 +100,6 @@ class ProductPage extends StatelessWidget {
               return ListTile(
                 title: Text(doc['name']),
                 subtitle: Text('\$${doc['price']}'),
-
-                // TAP = UPDATE
-                onTap: () => _updateProduct(
-                  context,
-                  doc.id,
-                  doc['name'],
-                  (doc['price'] as num).toDouble(),
-                ),
-
-                // DELETE BUTTON
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () => _deleteProduct(doc.id, context),
@@ -170,7 +109,6 @@ class ProductPage extends StatelessWidget {
           );
         },
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addProduct(context),
         child: const Icon(Icons.add),
