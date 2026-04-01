@@ -25,6 +25,47 @@ class MyApp extends StatelessWidget {
 class ProductPage extends StatelessWidget {
   const ProductPage({super.key});
 
+  // 🔥 ADD PRODUCT FUNCTION
+  Future<void> _addProduct(BuildContext context) async {
+    TextEditingController nameController = TextEditingController();
+    TextEditingController priceController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Product'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              TextField(
+                controller: priceController,
+                decoration: const InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await FirebaseFirestore.instance.collection('products').add({
+                  'name': nameController.text,
+                  'price': double.parse(priceController.text),
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final CollectionReference products =
@@ -32,6 +73,7 @@ class ProductPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Products')),
+
       body: StreamBuilder(
         stream: products.snapshots(),
         builder: (context, AsyncSnapshot snapshot) {
@@ -52,6 +94,12 @@ class ProductPage extends StatelessWidget {
             }).toList(),
           );
         },
+      ),
+
+      // 🔥 ADD BUTTON
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addProduct(context),
+        child: const Icon(Icons.add),
       ),
     );
   }
