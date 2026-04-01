@@ -25,6 +25,10 @@ class MyApp extends StatelessWidget {
 class ProductPage extends StatelessWidget {
   const ProductPage({super.key});
 
+  final CollectionReference products =
+      FirebaseFirestore.instance.collection('products');
+
+  // ADD
   Future<void> _addProduct(BuildContext context) async {
     TextEditingController nameController = TextEditingController();
     TextEditingController priceController = TextEditingController();
@@ -51,21 +55,15 @@ class ProductPage extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () async {
-                try {
-                  double price =
-                      double.tryParse(priceController.text) ?? 0.0;
+                double price =
+                    double.tryParse(priceController.text) ?? 0.0;
 
-                  await FirebaseFirestore.instance
-                      .collection('products')
-                      .add({
-                    'name': nameController.text,
-                    'price': price,
-                  });
+                await products.add({
+                  'name': nameController.text,
+                  'price': price,
+                });
 
-                  Navigator.pop(context);
-                } catch (e) {
-                  print("ERROR: $e");
-                }
+                Navigator.pop(context);
               },
               child: const Text('Add'),
             ),
@@ -75,13 +73,68 @@ class ProductPage extends StatelessWidget {
     );
   }
 
+  // UPDATE
+  Future<void> _updateProduct(
+      BuildContext context, String id, String currentName, double currentPrice) async {
+    TextEditingController nameController =
+        TextEditingController(text: currentName);
+    TextEditingController priceController =
+        TextEditingController(text: currentPrice.toString());
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Update Product'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              TextField(
+                controller: priceController,
+                decoration: const InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                double price =
+                    double.tryParse(priceController.text) ?? 0.0;
+
+                await products.doc(id).update({
+                  'name': nameController.text,
+                  'price': price,
+                });
+
+                Navigator.pop(context);
+              },
+              child: const Text('Update'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // DELETE
+  Future<void> _deleteProduct(String id, BuildContext context) async {
+    await products.doc(id).delete();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Product deleted')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final CollectionReference products =
-        FirebaseFirestore.instance.collection('products');
-
     return Scaffold(
       appBar: AppBar(title: const Text('Products')),
+
       body: StreamBuilder(
         stream: products.snapshots(),
         builder: (context, AsyncSnapshot snapshot) {
@@ -98,11 +151,26 @@ class ProductPage extends StatelessWidget {
               return ListTile(
                 title: Text(doc['name']),
                 subtitle: Text('\$${doc['price']}'),
+
+                // TAP = UPDATE
+                onTap: () => _updateProduct(
+                  context,
+                  doc.id,
+                  doc['name'],
+                  (doc['price'] as num).toDouble(),
+                ),
+
+                // DELETE BUTTON
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _deleteProduct(doc.id, context),
+                ),
               );
             }).toList(),
           );
         },
       ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addProduct(context),
         child: const Icon(Icons.add),
