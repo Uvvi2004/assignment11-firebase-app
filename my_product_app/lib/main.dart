@@ -25,7 +25,6 @@ class MyApp extends StatelessWidget {
 class ProductPage extends StatelessWidget {
   const ProductPage({super.key});
 
-  // 🔥 ADD PRODUCT FUNCTION
   Future<void> _addProduct(BuildContext context) async {
     TextEditingController nameController = TextEditingController();
     TextEditingController priceController = TextEditingController();
@@ -52,11 +51,21 @@ class ProductPage extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () async {
-                await FirebaseFirestore.instance.collection('products').add({
-                  'name': nameController.text,
-                  'price': double.parse(priceController.text),
-                });
-                Navigator.pop(context);
+                try {
+                  double price =
+                      double.tryParse(priceController.text) ?? 0.0;
+
+                  await FirebaseFirestore.instance
+                      .collection('products')
+                      .add({
+                    'name': nameController.text,
+                    'price': price,
+                  });
+
+                  Navigator.pop(context);
+                } catch (e) {
+                  print("ERROR: $e");
+                }
               },
               child: const Text('Add'),
             ),
@@ -73,7 +82,6 @@ class ProductPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Products')),
-
       body: StreamBuilder(
         stream: products.snapshots(),
         builder: (context, AsyncSnapshot snapshot) {
@@ -95,8 +103,6 @@ class ProductPage extends StatelessWidget {
           );
         },
       ),
-
-      // 🔥 ADD BUTTON
       floatingActionButton: FloatingActionButton(
         onPressed: () => _addProduct(context),
         child: const Icon(Icons.add),
